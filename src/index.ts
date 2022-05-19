@@ -28,11 +28,12 @@ const test: jsonEmployee = {
 
 
 function main() {
-    console.log('main')
+
     let array : Array<jsonEmployee> = employees.employees;
     let root: jsonEmployee = generateCompanyStructure(array);
     hireEmployee(root, test, test.boss);
-    getBoss(root, 'Alicia');
+
+    getBoss(root, 'Billy');
     getSubordinates(root, 'Alicia');
     fireEmployee(root, 'Xavier')
     promoteEmployee(root, 'Billy', 'promote');
