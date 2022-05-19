@@ -25,10 +25,6 @@ class TreeNode {
  * @returns {TreeNode}
  */
 
-interface Employee {
-    value: string;
-    descendant: Array<any>;
-}
 
 interface jsonEmployee {
     name: string,
@@ -38,15 +34,13 @@ interface jsonEmployee {
     descendant?: Array<jsonEmployee>
 }
 
-
-
-
 interface map {
     [index: string]: number
 }
 
 export function generateCompanyStructure(data: Array<jsonEmployee>) : jsonEmployee {
-
+    console.log('Normalizing JSON file...');
+    console.log('Generating employee tree...');
     const mapping : map = {};
     //want to map the current employees to their indexes for fast retreival when we look to find each employees boss
     for(let i: number = 0; i < data.length; i++) {
@@ -113,6 +107,7 @@ export function hireEmployee(currentEmployees: jsonEmployee, newEmployee: jsonEm
 
 
      dfs(currentEmployees);
+     console.log(`[hireEmployee]: Added new employee ${newEmployee.name} with ${bossName} as their boss`)
 }
 
 /**
@@ -124,11 +119,13 @@ export function hireEmployee(currentEmployees: jsonEmployee, newEmployee: jsonEm
  * @returns {void}
  */
 export function fireEmployee(currentEmployees:jsonEmployee, name: string) {
+    let replacement:jsonEmployee;
     function dfs(tree : jsonEmployee, parent: jsonEmployee, index: number) : jsonEmployee {
         if(tree.name === name) {
             if(tree.descendant !== undefined) {
-                let rand: number = Math.floor(Math.random() * tree.descendant.length - 1);
+                let rand: number = Math.floor(Math.random() * tree.descendant.length);
                 tree.descendant[rand].boss = tree.boss;
+                replacement = tree.descendant[rand];
                 parent.descendant.push(tree.descendant[rand]);
 
                 parent.descendant.splice(index, 1)
@@ -152,6 +149,7 @@ export function fireEmployee(currentEmployees:jsonEmployee, name: string) {
 
 
      dfs(currentEmployees, currentEmployees, 0);
+     console.log(`[fireEmployee]: Fired ${name} and replaced with ${replacement.name}`)
 }
 
 /**
@@ -162,37 +160,29 @@ export function fireEmployee(currentEmployees:jsonEmployee, name: string) {
  * @param {string} employeeName
  * @returns {void}
  */
-export function promoteEmployee(currentEmployees: jsonEmployee, name: string) {
-
+export function promoteEmployee(currentEmployees: jsonEmployee, name: string, type:string) {
+    let bossName:string;
     function dfs(tree : jsonEmployee, parent: jsonEmployee, index: number) : jsonEmployee {
         if(tree.name === name) {
+            bossName = parent.name;
+            let temp: string | null = parent.boss;
+            parent.boss = tree.name;
+            tree.boss = temp;
 
-            // let temp: string | null = parent.boss;
-            // parent.boss = tree.name;
-            // tree.boss = temp;
-            //console.log(tree.descendant);
-
-            // let temp: jsonEmployee = new TreeNode(parent.name, parent.jobTitle, tree.name, parent.salary, parent.descendant);
-            // parent =  new TreeNode(tree.name, tree.jobTitle, parent.name, tree.salary, tree.descendant);
-            // tree = temp;
             parent.descendant.splice(index, 1);
-            tree.descendant.push({...parent});
-            //console.log(tree.descendant)
+            if(tree.descendant !== undefined) {
+                tree.descendant.push({...parent});
+            } else {
+                tree.descendant = [];
+                tree.descendant.push({...parent});
+            }
+            // i was pushing a reference here, which was why it was circular
 
-            // for(let letters of tree.descendant) {
-            //     if(letters.descendant !== undefined) {
-            //         console.log(letters.descendant[0].descendant)
-            //     }
-
-            // }
             parent.name = tree.name;
             parent.jobTitle = tree.jobTitle;
             parent.salary = tree.salary;
+            parent.boss = tree.boss;
             parent.descendant = tree.descendant;
-
-            //tree.descendant = [];
-
-            //console.log(parent);
 
             return;
         }
@@ -207,6 +197,10 @@ export function promoteEmployee(currentEmployees: jsonEmployee, name: string) {
     }
 
     dfs(currentEmployees, currentEmployees, 0);
+    if(type === 'promote') {
+        console.log(`[promoteEmployee]: Promoted ${name} and made ${bossName} the subordinate`)
+    }
+
 
 }
 
@@ -219,7 +213,14 @@ export function promoteEmployee(currentEmployees: jsonEmployee, name: string) {
  * @param {string} subordinateName the new boss
  * @returns {void}
  */
-function demoteEmployee() {}
+export function demoteEmployee(currentEmployees:jsonEmployee, employeeName: string, subordinate: string) {
+
+    promoteEmployee(currentEmployees, subordinate, 'demote');
+
+    console.log(`[demoteEmployee]: Demoted employee (demoted ${employeeName} and replaced with ${subordinate})`)
+
+
+}
 
 
 

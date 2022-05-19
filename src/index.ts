@@ -1,9 +1,9 @@
 // Main code goes here
 
 import employees from './employees.json';
-import { generateCompanyStructure, hireEmployee, fireEmployee, promoteEmployee } from './manageEmployees';
-
-
+import { generateCompanyStructure, hireEmployee, fireEmployee, promoteEmployee, demoteEmployee } from './manageEmployees';
+import { getBoss, getSubordinates, findLowestEmployee } from './getEmployees';
+import logger from './logger';
 
 
 interface jsonEmployee {
@@ -26,38 +26,19 @@ const test: jsonEmployee = {
     descendant: []
 }
 
-function logger(emp: jsonEmployee) {
-    let string: string = '';
-    function dfs(tree: jsonEmployee) {
-        console.log(tree);
-        if(tree.descendant === undefined) {
-            return;
-        }
-
-        if(tree.descendant !== undefined) {
-            for(let i = 0; i < tree.descendant.length; i++) {
-                dfs(tree.descendant[i]);
-            }
-        }
-
-        return tree;
-    }
-
-    dfs(emp);
-}
 
 function main() {
     console.log('main')
     let array : Array<jsonEmployee> = employees.employees;
     let root: jsonEmployee = generateCompanyStructure(array);
     hireEmployee(root, test, test.boss);
-    //logger(root);
-    promoteEmployee(root, 'Alicia');
-    //console.log(root);
-    logger(root);
-    //fireEmployee(root, 'Maria');
-    //console.log(root);
-    //logger(root);
+    getBoss(root, 'Alicia');
+    getSubordinates(root, 'Alicia');
+    fireEmployee(root, 'Xavier')
+    promoteEmployee(root, 'Billy', 'promote');
+    demoteEmployee(root, 'Alicia', 'Kelly');
+    findLowestEmployee(root)
+
 }
 
 main()
